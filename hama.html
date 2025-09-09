@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hama Zones – Mapbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { position: absolute; inset: 0; }
+    #notebox {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 10;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #cursorTip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: rgba(255,255,255,0.95);
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      z-index: 11;
+      transform: translate(10px,10px);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="notebox">Hover over a zone</div>
+  <div id="cursorTip"></div>
+
+<script>
+  // Mapbox token (use yours if needed)
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWhtYWQtdGVjaCIsImEiOiJjbWY5czYwcjUxaXhrMmlxczZvamlmNm5tIn0.nJnJvwt0e4etH4CvHl0iMw';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/standard',
+    center: [36.75, 35.15],
+    zoom: 11,
+    projection: 'globe',
+    antialias: true
+  });
+
+  // <-- Put your original GeoJSON exactly as provided -->
+  const hamaGeoJSON = {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "P001-HAMA": "P001-HAMA"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.72403544639636,
+                35.21265002956898
+              ],
+              [
+                35.877274902470674,
+                35.314372721278914
+              ],
+              [
+                35.87211209064455,
+                35.237539102562536
+              ],
+              [
+                35.74772257151801,
+                34.848814996709834
+              ],
+              [
+                35.84830557455143,
+                34.611083082377625
+              ],
+              [
+                36.28949142009531,
+                34.51972823256395
+              ],
+              [
+                35.47190451934625,
+                33.30514008564292
+              ],
+              [
+                35.755892156778216,
+                32.44510187557347
+              ],
+              [
+                36.4300229662603,
+                32.23747736569437
+              ],
+              [
+                36.85265478593412,
+                32.11595984830069
+              ],
+              [
+                37.34383270775753,
+                32.328873345027716
+              ],
+              [
+                41.164312619762214,
+                34.34464954656764
+              ],
+              [
+                41.34616726420157,
+                34.81841108463088
+              ],
+              [
+                41.491423266714456,
+                35.520198397951965
+              ],
+              [
+                39.18282263179694,
+                35.30432589750589
+              ],
+              [
+                38.028522314338176,
+                35.19638964728286
+              ],
+              [
+                37.452805561520165,
+                35.170475978071345
+              ],
+              [
+                37.28593751052652,
+                35.16642314972316
+              ],
+              [
+                36.915298195703734,
+                35.14537624718295
+              ],
+              [
+                36.87422199687941,
+                35.08845339705982
+              ],
+              [
+                36.751525101189934,
+                35.054026387633286
+              ],
+              [
+                36.67424205187545,
+                35.056641717205615
+              ],
+              [
+                36.63783091342866,
+                35.105550271062114
+              ],
+              [
+                36.66622104005345,
+                35.163280198705294
+              ],
+              [
+                36.72403544639636,
+                35.21265002956898
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "Hama R002 ": "Hama R002 "
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.75807641391927,
+                35.171699129127035
+              ],
+              [
+                36.78753421806065,
+                35.16078727608615
+              ],
+              [
+                36.81707090074184,
+                35.12789819641387
+              ],
+              [
+                36.79396414340609,
+                35.101292683883834
+              ],
+              [
+                36.7495707865027,
+                35.093123056543206
+              ],
+              [
+                36.69584713537978,
+                35.12551801382065
+              ],
+              [
+                36.69834974106793,
+                35.13859001027315
+              ],
+              [
+                36.70039023904645,
+                35.149298437659716
+              ],
+              [
+                36.716339322657774,
+                35.159764189966126
+              ],
+              [
+                36.734590312781556,
+                35.17187867635343
+              ],
+              [
+                36.758069238780266,
+                35.1717009270887
+              ],
+              [
+                36.809897985930434,
+                35.22405550314973
+              ],
+              [
+                36.72406597556678,
+                35.21263461258942
+              ],
+              [
+                36.665689818973235,
+                35.16289499856504
+              ],
+              [
+                36.63784864165916,
+                35.10553366615588
+              ],
+              [
+                36.674511246554374,
+                35.05683570853749
+              ],
+              [
+                36.75160266906988,
+                35.05408987313726
+              ],
+              [
+                36.87483772160749,
+                35.088683351719055
+              ],
+              [
+                36.91529040136294,
+                35.14537523567331
+              ],
+              [
+                36.872547364387856,
+                35.21772227833743
+              ],
+              [
+                36.80986974110908,
+                35.224069070054085
+              ],
+              [
+                36.75807641391927,
+                35.171699129127035
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "Hama R001 ": "Hama R001 "
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.75587697750581,
+                35.15476707472516
+              ],
+              [
+                36.77216470730963,
+                35.156054195634404
+              ],
+              [
+                36.77675888237462,
+                35.1539310289313
+              ],
+              [
+                36.78076256990104,
+                35.148543285151334
+              ],
+              [
+                36.78087256916115,
+                35.13197999449549
+              ],
+              [
+                36.77701127861531,
+                35.12073338436534
+              ],
+              [
+                36.75958783620182,
+                35.118547332120514
+              ],
+              [
+                36.755822679486094,
+                35.12063420595651
+              ],
+              [
+                36.75428687857493,
+                35.1210906612466
+              ],
+              [
+                36.75207313616355,
+                35.12160935796545
+              ],
+              [
+                36.74550438461148,
+                35.11965424984511
+              ],
+              [
+                36.737759728988266,
+                35.119833121439655
+              ],
+              [
+                36.72622036387985,
+                35.12830391778532
+              ],
+              [
+                36.7240873345217,
+                35.135203988562694
+              ],
+              [
+                36.72190830887882,
+                35.1421108736402
+              ],
+              [
+                36.73185567940308,
+                35.14517420029432
+              ],
+              [
+                36.730661303338294,
+                35.152722651430174
+              ],
+              [
+                36.75587846497206,
+                35.15476378779468
+              ],
+              [
+                36.75807859231113,
+                35.171697019205354
+              ],
+              [
+                36.73457045254065,
+                35.17187211787241
+              ],
+              [
+                36.70036113305254,
+                35.14918945920991
+              ],
+              [
+                36.69589544222737,
+                35.12546130275419
+              ],
+              [
+                36.749662546532335,
+                35.093154296128176
+              ],
+              [
+                36.793953643744715,
+                35.10132785847614
+              ],
+              [
+                36.817093763892444,
+                35.12791753497112
+              ],
+              [
+                36.78756890133883,
+                35.16075658662119
+              ],
+              [
+                36.75807419111234,
+                35.17169994026423
+              ],
+              [
+                36.75587697750581,
+                35.15476707472516
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "HAMA city center": "HAMA city center"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.75604125829727,
+                35.139035394419594
+              ],
+              [
+                36.7319046939981,
+                35.14517316471584
+              ],
+              [
+                36.7219294369832,
+                35.14207536439021
+              ],
+              [
+                36.72622103737788,
+                35.128343718809035
+              ],
+              [
+                36.73774114871202,
+                35.11984436495371
+              ],
+              [
+                36.745497525982046,
+                35.119654442286745
+              ],
+              [
+                36.75212658642235,
+                35.1216275596186
+              ],
+              [
+                36.7558129168612,
+                35.12064542273124
+              ],
+              [
+                36.75957621224029,
+                35.11855248840105
+              ],
+              [
+                36.77711407279071,
+                35.12077066574214
+              ],
+              [
+                36.78083337517796,
+                35.1320962370645
+              ],
+              [
+                36.78080050280775,
+                35.14854312655969
+              ],
+              [
+                36.77680539373159,
+                35.15389568095053
+              ],
+              [
+                36.77221700624483,
+                35.1560502195852
+              ],
+              [
+                36.73073063235742,
+                35.152770260812474
+              ],
+              [
+                36.731868540331334,
+                35.1451839130992
+              ],
+              [
+                36.75604125829727,
+                35.139035394419594
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "P002-HAMA": "P002-HAMA"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.7225022023039,
+                35.21311169700404
+              ],
+              [
+                36.80989052911945,
+                35.224068017729145
+              ],
+              [
+                36.872497265033815,
+                35.21769222856723
+              ],
+              [
+                36.91530603309708,
+                35.14537440350698
+              ],
+              [
+                37.02148681504044,
+                35.15130808643381
+              ],
+              [
+                37.16002925959758,
+                35.159207692424786
+              ],
+              [
+                37.91289789349249,
+                35.191122155071895
+              ],
+              [
+                39.142478001140645,
+                35.30054115783326
+              ],
+              [
+                41.491597786011965,
+                35.52019599788291
+              ],
+              [
+                42.58345823826724,
+                37.22545042402402
+              ],
+              [
+                42.259573931560055,
+                37.54693795344035
+              ],
+              [
+                38.81474127254003,
+                37.11780537696998
+              ],
+              [
+                37.63605278503445,
+                36.88997893033762
+              ],
+              [
+                36.643652757594396,
+                37.00165352280463
+              ],
+              [
+                36.23148855393924,
+                36.34183712054785
+              ],
+              [
+                35.96674175039695,
+                36.03279363187457
+              ],
+              [
+                35.70570819261411,
+                35.899061823590415
+              ],
+              [
+                35.62663090628001,
+                35.70985523779257
+              ],
+              [
+                35.581904490392816,
+                35.51053391992441
+              ],
+              [
+                35.87684769004794,
+                35.314645714497416
+              ],
+              [
+                36.3065437052529,
+                35.263293149078066
+              ],
+              [
+                36.7225022023039,
+                35.21311169700404
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        },
+        "id": 4
+      }
+    ]
+  };
+
+  // Normalize properties so every feature has .properties.name (pull first property value)
+  hamaGeoJSON.features.forEach((f, i) => {
+    if (!f.properties) f.properties = {};
+    if (!('name' in f.properties)) {
+      // use the first property value if possible
+      const vals = Object.values(f.properties);
+      f.properties.name = (vals.length && vals[0]) ? String(vals[0]).trim() : `zone-${i}`;
+    }
+    // ensure unique id (use existing id or index)
+    if (f.id === undefined) f.id = i;
+  });
+
+  // add source + layers
+  map.on('load', () => {
+    map.addSource('hama-zones', { type: 'geojson', data: hamaGeoJSON });
+
+    // default light-black fill
+    map.addLayer({
+      id: 'zones-fill',
+      type: 'fill',
+      source: 'hama-zones',
+      paint: {
+        'fill-color': '#111111',   // dark/light-black
+        'fill-opacity': 0.3
+      }
+    });
+
+    // outlines
+    map.addLayer({
+      id: 'zones-outline',
+      type: 'line',
+      source: 'hama-zones',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1.6
+      }
+    });
+
+    // highlight layer (initially filtered out)
+    map.addLayer({
+      id: 'zones-highlight',
+      type: 'fill',
+      source: 'hama-zones',
+      paint: {
+        'fill-color': '#fff08c',   // light yellow
+        'fill-opacity': 0.28
+      },
+      filter: ['==', ['get', 'name'], '___NO_MATCH___']
+    });
+
+    const notebox = document.getElementById('notebox');
+    const cursorTip = document.getElementById('cursorTip');
+
+    // mouse move on polygons
+    map.on('mousemove', 'zones-fill', (e) => {
+      const feat = (e.features && e.features[0]) ? e.features[0] : null;
+      if (!feat) return;
+      const name = feat.properties.name || 'Unnamed';
+      // set highlight filter to this name
+      map.setFilter('zones-highlight', ['==', ['get', 'name'], name]);
+      // update notebox
+      notebox.textContent = name;
+      // show small tip near cursor
+      cursorTip.style.display = 'block';
+      cursorTip.textContent = name;
+      // position the tip (e.point is DOM pixel coords)
+      cursorTip.style.left = (e.point.x + 12) + 'px';
+      cursorTip.style.top  = (e.point.y + 12) + 'px';
+
+      // change cursor
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // leave polygon -> reset
+    map.on('mouseleave', 'zones-fill', () => {
+      map.setFilter('zones-highlight', ['==', ['get', 'name'], '___NO_MATCH___']);
+      notebox.textContent = 'Hover over a zone';
+      cursorTip.style.display = 'none';
+      map.getCanvas().style.cursor = '';
+    });
+
+    // keep cursor pointer and show tooltip on outlines as well (optional)
+    map.on('mouseenter', 'zones-outline', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'zones-outline', () => { map.getCanvas().style.cursor = ''; });
+
+    // click popup (optional)
+    map.on('click', 'zones-fill', (e) => {
+      const feat = (e.features && e.features[0]) ? e.features[0] : null;
+      if (!feat) return;
+      const name = feat.properties.name || 'Unnamed';
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(`<strong>${name}</strong>`)
+        .addTo(map);
+    });
+
+  });
+
+</script>
+</body>
+</html>

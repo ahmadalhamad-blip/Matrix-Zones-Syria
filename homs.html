@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Homs Zones – Mapbox (fixed)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { position: absolute; inset: 0; }
+    #notebox {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 10;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #cursorTip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: rgba(255,255,255,0.95);
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      z-index: 11;
+      transform: translate(10px,10px);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="notebox">Hover over a zone</div>
+  <div id="cursorTip"></div>
+
+<script>
+  // Mapbox token (you already have one embedded; replace if desired)
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWhtYWQtdGVjaCIsImEiOiJjbWY5czYwcjUxaXhrMmlxczZvamlmNm5tIn0.nJnJvwt0e4etH4CvHl0iMw';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/standard',
+    center: [36.72, 34.73],
+    zoom: 10,
+    projection: 'globe',
+    antialias: true
+  });
+
+  // --- full GeoJSON (exactly as you provided) ---
+  const homsGeoJSON = {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "P001-HOMS": "P001-HOMS"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.53741488533251,
+                34.692719275228555
+              ],
+              [
+                36.53694720924,
+                34.74162215751751
+              ],
+              [
+                36.580745652513826,
+                34.770125016399746
+              ],
+              [
+                36.631294179931274,
+                34.808142718940424
+              ],
+              [
+                36.698100432484125,
+                34.81312394379668
+              ],
+              [
+                36.79314430323112,
+                34.81198735792978
+              ],
+              [
+                36.84482351319449,
+                34.7408372697506
+              ],
+              [
+                37.10531070244157,
+                34.68412971652991
+              ],
+              [
+                37.67367419564314,
+                34.62663727554231
+              ],
+              [
+                38.81040118204628,
+                34.51165239356711
+              ],
+              [
+                41.142890698491584,
+                34.335232178986075
+              ],
+              [
+                41.40274729666288,
+                34.78424991283106
+              ],
+              [
+                41.3988868801884,
+                35.366737687787534
+              ],
+              [
+                41.59768117357808,
+                35.66025366422711
+              ],
+              [
+                41.380536315550756,
+                36.06862188096761
+              ],
+              [
+                41.385468169099056,
+                36.277623368581374
+              ],
+              [
+                41.486951422648616,
+                36.50822142174688
+              ],
+              [
+                42.106203406791025,
+                36.57505199628898
+              ],
+              [
+                42.51748570675869,
+                37.08178757893782
+              ],
+              [
+                42.26795673175698,
+                37.34288922650009
+              ],
+              [
+                41.85806639091501,
+                37.37229248540754
+              ],
+              [
+                39.747109119035855,
+                37.136163797276964
+              ],
+              [
+                38.38834604754123,
+                37.07903224913012
+              ],
+              [
+                37.2663512755617,
+                37.04847589070609
+              ],
+              [
+                36.758399518394214,
+                37.109273453352756
+              ],
+              [
+                36.42055783344523,
+                36.5424971410669
+              ],
+              [
+                35.87071469497127,
+                36.03573866480947
+              ],
+              [
+                35.63296134460515,
+                35.723847301999044
+              ],
+              [
+                35.74729235376904,
+                35.36325405012812
+              ],
+              [
+                35.794428930261915,
+                34.879008907448465
+              ],
+              [
+                35.92564466073506,
+                34.60001966454465
+              ],
+              [
+                36.23274945181029,
+                34.58307495124353
+              ],
+              [
+                36.38938613476742,
+                34.651707839413916
+              ],
+              [
+                36.53741488533251,
+                34.692719275228555
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "HOMS-R002": "HOMS-R002"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.72109727578771,
+                34.78537118806645
+              ],
+              [
+                36.69827494628504,
+                34.813005307949666
+              ],
+              [
+                36.63048305000777,
+                34.80787953151264
+              ],
+              [
+                36.58186479587126,
+                34.77104734193358
+              ],
+              [
+                36.536636670122746,
+                34.74095700826342
+              ],
+              [
+                36.53748228763108,
+                34.692695809203244
+              ],
+              [
+                36.64035504393145,
+                34.623578574228446
+              ],
+              [
+                36.73178000738362,
+                34.62896555431632
+              ],
+              [
+                36.80559080819807,
+                34.67405718545966
+              ],
+              [
+                36.84456697862862,
+                34.74122299619743
+              ],
+              [
+                36.79242380788409,
+                34.811956180714944
+              ],
+              [
+                36.69825012701582,
+                34.81303599407127
+              ],
+              [
+                36.72109706415047,
+                34.78537321257655
+              ],
+              [
+                36.782604576253675,
+                34.73169366379531
+              ],
+              [
+                36.746007176651936,
+                34.671831136578504
+              ],
+              [
+                36.67692611229508,
+                34.674820310207956
+              ],
+              [
+                36.640356427871865,
+                34.7056473082431
+              ],
+              [
+                36.638520887892994,
+                34.74553716489974
+              ],
+              [
+                36.6596341678636,
+                34.76449283173726
+              ],
+              [
+                36.66741661068312,
+                34.767143818204616
+              ],
+              [
+                36.72109727578771,
+                34.78537118806645
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "HOMS_R001": "HOMS_R001"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.71686931361563,
+                34.75961337842891
+              ],
+              [
+                36.7305729445282,
+                34.75902944059452
+              ],
+              [
+                36.73879075486097,
+                34.74874029114501
+              ],
+              [
+                36.75372288023705,
+                34.73896126071346
+              ],
+              [
+                36.74443766751605,
+                34.699588904254554
+              ],
+              [
+                36.696760259413054,
+                34.70592339033531
+              ],
+              [
+                36.664427252980076,
+                34.72013744107177
+              ],
+              [
+                36.65095801219627,
+                34.74001353028618
+              ],
+              [
+                36.67335994793426,
+                34.75362521439294
+              ],
+              [
+                36.6922163000543,
+                34.75009773113371
+              ],
+              [
+                36.71685431674034,
+                34.759619598523805
+              ],
+              [
+                36.72107752563272,
+                34.78538432427142
+              ],
+              [
+                36.659624554139405,
+                34.76448570874399
+              ],
+              [
+                36.63847522959939,
+                34.74552516912588
+              ],
+              [
+                36.640338045327155,
+                34.70580741922379
+              ],
+              [
+                36.677222673547305,
+                34.6751565082854
+              ],
+              [
+                36.74599878402364,
+                34.671780839542905
+              ],
+              [
+                36.782604025950405,
+                34.73171124874018
+              ],
+              [
+                36.72108898001184,
+                34.78539228953156
+              ],
+              [
+                36.71897914681374,
+                34.772502833980234
+              ],
+              [
+                36.71686931361563,
+                34.75961337842891
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "HOMS CITY CENTER": "HOMS CITY CENTER"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.69680769480968,
+                34.70594935144227
+              ],
+              [
+                36.74444699547075,
+                34.69966115902619
+              ],
+              [
+                36.75363605547486,
+                34.738945317151035
+              ],
+              [
+                36.73873901041782,
+                34.74896710205887
+              ],
+              [
+                36.73049888634287,
+                34.759024517615
+              ],
+              [
+                36.71688175261684,
+                34.75960829440625
+              ],
+              [
+                36.692263068811314,
+                34.75010047070677
+              ],
+              [
+                36.67332964898597,
+                34.753590898504385
+              ],
+              [
+                36.65109740423142,
+                34.73982193345229
+              ],
+              [
+                36.664452695683536,
+                34.72010211953652
+              ],
+              [
+                36.69680769480968,
+                34.70594935144227
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "P002-HOMS": "P002-HOMS"
+        },
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                36.53742555365966,
+                34.69260537293599
+              ],
+              [
+                36.38659780837787,
+                34.651241368240676
+              ],
+              [
+                36.23295219999983,
+                34.58273534235538
+              ],
+              [
+                35.92541541830314,
+                34.59981992826751
+              ],
+              [
+                36.22105286985011,
+                34.27928483241385
+              ],
+              [
+                36.225130855944286,
+                33.991443311955415
+              ],
+              [
+                35.92674438258115,
+                33.78318137037603
+              ],
+              [
+                35.84413222086902,
+                33.56441826173524
+              ],
+              [
+                35.54202225728173,
+                32.94778344387785
+              ],
+              [
+                35.569204124229685,
+                32.66319770068989
+              ],
+              [
+                36.17281529067677,
+                32.39297870968182
+              ],
+              [
+                36.851390538748944,
+                32.04311278498115
+              ],
+              [
+                41.14267623998628,
+                34.335129505216514
+              ],
+              [
+                38.80823500525956,
+                34.50438789961403
+              ],
+              [
+                37.4506178056197,
+                34.649494924734505
+              ],
+              [
+                37.10350167024117,
+                34.68361942921173
+              ],
+              [
+                36.84459049706947,
+                34.74109716774069
+              ],
+              [
+                36.80652929851081,
+                34.674370258280426
+              ],
+              [
+                36.729782727436124,
+                34.628706329534964
+              ],
+              [
+                36.640877332700825,
+                34.62331539170988
+              ],
+              [
+                36.53742555365966,
+                34.69260537293599
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        },
+        "id": 4
+      }
+    ]
+  };
+
+  // Normalize properties so every feature has .properties.name and a unique id
+  homsGeoJSON.features.forEach((f, i) => {
+    if (!f.properties) f.properties = {};
+    if (!('name' in f.properties)) {
+      const vals = Object.values(f.properties);
+      f.properties.name = (vals.length && vals[0]) ? String(vals[0]).trim() : `zone-${i}`;
+    }
+    if (f.id === undefined) f.id = i;
+  });
+
+  // Add layers when style is ready
+  map.on('load', () => {
+    map.addSource('homs-zones', { type: 'geojson', data: homsGeoJSON });
+
+    // DEFAULT FILL (black with 35% opacity like Aleppo file)
+    map.addLayer({
+      id: 'zones-fill',
+      type: 'fill',
+      source: 'homs-zones',
+      paint: {
+        'fill-color': 'black',
+        'fill-opacity': 0.35,
+        'fill-outline-color': '#000000'
+      }
+    });
+
+    // OUTLINES (strong black)
+    map.addLayer({
+      id: 'zones-outline',
+      type: 'line',
+      source: 'homs-zones',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 2,
+        'line-opacity': 1
+      }
+    });
+
+    // HIGHLIGHT LAYER: light yellow (hex) with 18% opacity
+    map.addLayer({
+      id: 'zones-highlight',
+      type: 'fill',
+      source: 'homs-zones',
+      paint: {
+        'fill-color': '#ffeb3b',
+        'fill-opacity': 0.18
+      },
+      filter: ['==', ['get', 'name'], '___NO_MATCH___']
+    });
+
+    const notebox = document.getElementById('notebox');
+    const cursorTip = document.getElementById('cursorTip');
+
+    // Robust hover: try e.features, fallback to queryRenderedFeatures
+    map.on('mousemove', 'zones-fill', (e) => {
+      // Prefer e.features when provided
+      let features = (e.features && e.features.length) ? e.features : map.queryRenderedFeatures(e.point, { layers: ['zones-fill'] });
+      if (!features || !features.length) return;
+      const feat = features[0];
+      const name = feat.properties.name || 'Unnamed';
+
+      // highlight this feature by name
+      map.setFilter('zones-highlight', ['==', ['get', 'name'], name]);
+
+      // update notebox and floating tip
+      notebox.textContent = name;
+      cursorTip.style.display = 'block';
+      cursorTip.textContent = name;
+      cursorTip.style.left = (e.point.x + 12) + 'px';
+      cursorTip.style.top  = (e.point.y + 12) + 'px';
+
+      // pointer cursor
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Reset when leaving polygons
+    map.on('mouseleave', 'zones-fill', () => {
+      map.setFilter('zones-highlight', ['==', ['get', 'name'], '___NO_MATCH___']);
+      notebox.textContent = 'Hover over a zone';
+      cursorTip.style.display = 'none';
+      map.getCanvas().style.cursor = '';
+    });
+
+    // outline cursor changes
+    map.on('mouseenter', 'zones-outline', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'zones-outline', () => { map.getCanvas().style.cursor = ''; });
+
+    // Click popup
+    map.on('click', 'zones-fill', (e) => {
+      let features = (e.features && e.features.length) ? e.features : map.queryRenderedFeatures(e.point, { layers: ['zones-fill'] });
+      if (!features || !features.length) return;
+      const feat = features[0];
+      const name = feat.properties.name || 'Unnamed';
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(`<strong>${name}</strong>`)
+        .addTo(map);
+    });
+  });
+
+  // Hide cursorTip on touchstart (helpful on mobile)
+  window.addEventListener('touchstart', () => { document.getElementById('cursorTip').style.display = 'none'; });
+
+</script>
+</body>
+</html>
