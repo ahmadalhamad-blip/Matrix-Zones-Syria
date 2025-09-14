@@ -59,7 +59,7 @@
     antialias: true
   });
 
-  // <-- Put your original GeoJSON exactly as provided -->
+  // === ORIGINAL GEOJSON (kept exactly as provided) ===
   const hamaGeoJSON = {
     "type": "FeatureCollection",
     "features": [
@@ -588,29 +588,39 @@
     ]
   };
 
-  // Normalize properties so every feature has .properties.name (pull first property value)
-  hamaGeoJSON.features.forEach((f, i) => {
+  // Build a working copy so we DO NOT mutate the base object you provided
+  const hamaCopy = JSON.parse(JSON.stringify(hamaGeoJSON));
+
+  // Normalize properties in the copy so each feature has .properties.name and an id
+  hamaCopy.features.forEach((f, i) => {
     if (!f.properties) f.properties = {};
     if (!('name' in f.properties)) {
-      // use the first property value if possible
       const vals = Object.values(f.properties);
       f.properties.name = (vals.length && vals[0]) ? String(vals[0]).trim() : `zone-${i}`;
     }
-    // ensure unique id (use existing id or index)
     if (f.id === undefined) f.id = i;
   });
 
-  // add source + layers
-  map.on('load', () => {
-    map.addSource('hama-zones', { type: 'geojson', data: hamaGeoJSON });
+  // Mapping of names -> percentages (trimmed names)
+  const multiplicators = {
+    "HAMA city center": "0%",
+    "Hama R001": "20%",
+    "Hama R002": "40%",
+    "P001-HAMA": "60%",
+    "P002-HAMA": "60%"
+  };
 
-    // default light-black fill
+  // add source + layers using the copy
+  map.on('load', () => {
+    map.addSource('hama-zones', { type: 'geojson', data: hamaCopy });
+
+    // default fill
     map.addLayer({
       id: 'zones-fill',
       type: 'fill',
       source: 'hama-zones',
       paint: {
-        'fill-color': '#111111',   // dark/light-black
+        'fill-color': '#111111',
         'fill-opacity': 0.3
       }
     });
@@ -632,7 +642,7 @@
       type: 'fill',
       source: 'hama-zones',
       paint: {
-        'fill-color': '#fff08c',   // light yellow
+        'fill-color': '#fff08c',
         'fill-opacity': 0.28
       },
       filter: ['==', ['get', 'name'], '___NO_MATCH___']
@@ -645,23 +655,25 @@
     map.on('mousemove', 'zones-fill', (e) => {
       const feat = (e.features && e.features[0]) ? e.features[0] : null;
       if (!feat) return;
-      const name = feat.properties.name || 'Unnamed';
-      // set highlight filter to this name
+      const name = feat.properties.name || (Object.values(feat.properties)[0] || 'Unnamed').toString().trim();
+      const mult = multiplicators[name] || "N/A";
+
+      // highlight the hovered feature (by trimmed name)
       map.setFilter('zones-highlight', ['==', ['get', 'name'], name]);
-      // update notebox
-      notebox.textContent = name;
-      // show small tip near cursor
+
+      // update top notebox WITH percentage
+      notebox.textContent = `${name} - Matrix multiplicator ${mult}`;
+
+      // show floating tip (name only)
       cursorTip.style.display = 'block';
       cursorTip.textContent = name;
-      // position the tip (e.point is DOM pixel coords)
       cursorTip.style.left = (e.point.x + 12) + 'px';
       cursorTip.style.top  = (e.point.y + 12) + 'px';
 
-      // change cursor
       map.getCanvas().style.cursor = 'pointer';
     });
 
-    // leave polygon -> reset
+    // reset on leave
     map.on('mouseleave', 'zones-fill', () => {
       map.setFilter('zones-highlight', ['==', ['get', 'name'], '___NO_MATCH___']);
       notebox.textContent = 'Hover over a zone';
@@ -669,23 +681,24 @@
       map.getCanvas().style.cursor = '';
     });
 
-    // keep cursor pointer and show tooltip on outlines as well (optional)
+    // cursor on outlines
     map.on('mouseenter', 'zones-outline', () => { map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'zones-outline', () => { map.getCanvas().style.cursor = ''; });
 
-    // click popup (optional)
+    // click popup shows only the name
     map.on('click', 'zones-fill', (e) => {
       const feat = (e.features && e.features[0]) ? e.features[0] : null;
       if (!feat) return;
-      const name = feat.properties.name || 'Unnamed';
+      const name = feat.properties.name || (Object.values(feat.properties)[0] || 'Unnamed').toString().trim();
       new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(`<strong>${name}</strong>`)
         .addTo(map);
     });
-
   });
 
+  // hide floating tip on touchstart (helpful for mobile)
+  window.addEventListener('touchstart', () => { document.getElementById('cursorTip').style.display = 'none'; });
 </script>
 </body>
 </html>
