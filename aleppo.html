@@ -30,29 +30,33 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
-    .zone-tooltip.leaflet-tooltip {
+    /* Floating note box */
+    #floatingNote {
+      position: absolute;
       background: rgba(255,255,204,0.95);
-      color: #111;
       border: 1px solid #333;
       border-radius: 4px;
       padding: 4px 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
       font-size: 13px;
+      color: #111;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      pointer-events: none;
+      display: none; /* hidden until hover */
+      z-index: 2000;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="notebox">Hover over a zone</div>
+  <div id="floatingNote"></div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     // --- Aleppo GeoJSON ---
-    const aleppoZones = {
-      "type": "FeatureCollection",
-      "features": [
+    const aleppoZones = { "type": "FeatureCollection", "features": [
         {
           "type": "Feature",
           "properties": { "Aleppo P002": "Aleppo P002" },
@@ -94,8 +98,7 @@
             "coordinates": [[[37.16318817531595,36.20054042567547],[37.13600482702205,36.25617643151],[37.1071961133334,36.22760299144586],[37.09387993688327,36.23080519508292],[37.08908290543074,36.21725869621312],[37.08564623991737,36.198258995188475],[37.08486220187642,36.183348060919315],[37.07230217621819,36.173101761196236],[37.09173756399194,36.167682778156866],[37.12510191226676,36.16869221920933],[37.154131645845496,36.15441026698362],[37.174184257450776,36.15935655531392],[37.18477845428387,36.1789145220953],[37.186163623348506,36.19265675296697],[37.2116491867302,36.1993995846876],[37.18770141838567,36.22720031582676],[37.16599691245921,36.252964726971214],[37.14263785701233,36.25788403459941],[37.13599157787834,36.256293207358155],[37.16318817531595,36.20054042567547]]]
           }
         }
-      ]
-    };
+      ] };
 
     // Multiplicator mapping
     const multiplicators = {
@@ -132,6 +135,7 @@
     };
 
     const notebox = document.getElementById('notebox');
+    const floatingNote = document.getElementById('floatingNote');
 
     function highlightFeature(e) {
       const layer = e.target;
@@ -144,19 +148,30 @@
       const name = Object.values(layer.feature.properties)[0] || 'Zone';
       const mult = multiplicators[name] || "N/A";
       notebox.textContent = `${name} - Matrix Multiplicator ${mult}`;
+
+      // Floating note → only name
+      floatingNote.style.display = 'block';
+      floatingNote.textContent = `${name}`;
     }
 
     function resetHighlight(e) {
       geojson.resetStyle(e.target);
       notebox.textContent = 'Hover over a zone';
+
+      // Hide floating note
+      floatingNote.style.display = 'none';
+    }
+
+    function moveFloatingNote(e) {
+      floatingNote.style.left = (e.originalEvent.pageX + 15) + 'px';
+      floatingNote.style.top = (e.originalEvent.pageY + 15) + 'px';
     }
 
     function onEachFeature(feature, layer) {
-      const name = Object.values(feature.properties)[0] || 'Zone';
-
       layer.on({
         mouseover: highlightFeature,
-        mouseout: resetHighlight
+        mouseout: resetHighlight,
+        mousemove: moveFloatingNote
       });
     }
 
