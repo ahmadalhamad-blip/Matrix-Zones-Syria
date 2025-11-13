@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tartus Zones – Mapbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { position: absolute; inset: 0; }
+    #notebox {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 10;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #cursorTip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: rgba(255,255,255,0.95);
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      z-index: 11;
+      transform: translate(10px,10px);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="notebox">Hover over a zone</div>
+  <div id="cursorTip"></div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWhtYWQtdGVjaCIsImEiOiJjbWY5czYwcjUxaXhrMmlxczZvamlmNm5tIn0.nJnJvwt0e4etH4CvHl0iMw';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/standard',
+    center: [35.88, 34.92],
+    zoom: 11,
+    projection: 'globe',
+    antialias: true
+  });
+
+  // Percentage data for each zone
+  const zonePercentages = {
+    "TARTUS-ROO1": "20%",
+    "TARTUS CITY CENTER": "0%",
+    "TARTUS SYRIA": "20%"
+  };
+
+  const tartusGeoJSON = {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": { "name": "TARTUS-ROO1" },
+        "geometry": { "type": "Polygon", "coordinates": [[[35.8915208013469,34.92697166611654],[35.91339778138911,34.93293148697722],[35.93087884827173,34.93912429607778],[35.942552069608155,34.93214730521187],[35.95120667784012,34.92094442154475],[35.95559654418599,34.911171285413886],[35.95920660297401,34.90488076349823],[35.95778809791159,34.89220753594407],[35.95733617963609,34.88311872986768],[35.95714182467179,34.87456044020276],[35.94540198546119,34.84070920082918],[35.901599131475095,34.826271701533585],[35.89678257889371,34.82493907363315],[35.87974287248272,34.8230242410193],[35.900812881866926,34.79906496656325],[35.90980988476396,34.77449932533247],[35.918720149944015,34.749910973328284],[35.939890956592166,34.74959115487042],[36.00583642935444,34.75274032279651],[36.04801153087429,34.78077129518198],[36.076311158921015,34.81167191106907],[36.07644386111823,34.84421341388233],[35.98951104779199,34.93905491138918],[35.97057221609158,34.971595561573984],[35.95523431039601,35.00262278134174],[35.91492533671362,34.99944910241822],[35.870262072704264,34.99115239971438],[35.86825851011406,34.96516443224296],[35.867378566708965,34.92911571226737],[35.8915208013469,34.92697166611654]]]}
+      },
+      {
+        "type": "Feature",
+        "properties": { "name": "TARTUS CITY CENTER" },
+        "geometry": { "type": "Polygon", "coordinates": [[[35.89172988280191,34.92677282471996],[35.88107834340963,34.92750537949439],[35.870426804017335,34.92823793426882],[35.85282228476568,34.933231524538755],[35.839231995811076,34.93044640747331],[35.834285291350334,34.918847497686684],[35.84542992763933,34.89884569150461],[35.8506454284875,34.881290321829425],[35.85978295663412,34.85456730991847],[35.86665920475214,34.83603092635825],[35.875475257972056,34.823535055753595],[35.90020963224538,34.826004168260745],[35.94515873366069,34.84079113301253],[35.95298294120707,34.861728622793876],[35.95711375055889,34.87496756387081],[35.957342883913235,34.88569975878212],[35.95895610188745,34.90496249825391],[35.95102014226323,34.92137632611964],[35.942204111835025,34.932931638472624],[35.931744108679396,34.93864789706798],[35.908465014201454,34.93240075898967],[35.89172988280191,34.92677282471996]]]}
+      },
+      {
+        "type": "Feature",
+        "properties": { "name": "TARTUS SYRIA" },
+        "geometry": { "type": "Polygon", "coordinates": [[[36.78565020413686,32.0683984995631],[41.401218192118534,34.24617977001675],[41.74098519537728,36.20987954464306],[42.898590858722685,36.99408662534891],[42.4399611085054,37.49154210041317],[39.17163108828075,37.093067743105635],[36.56694333005996,36.95718958278519],[35.666402707308286,35.67167591297728],[35.87101387736726,34.99108813970355],[35.91237762911076,34.99892243078883],[35.955670553330336,35.00363565242942],[35.98504609852759,34.946042398928],[36.076020754556154,34.842310074929664],[36.07714071837077,34.810457579463474],[36.04613351043181,34.77990278855631],[36.00639156076018,34.75270252345398],[35.962832614310905,34.75066680437291],[35.9402661804819,34.74952658366554],[35.919003896618705,34.74987759432186],[36.000267021355285,34.53034212679768],[36.30871472403268,34.55943655713723],[35.375983643296536,32.57153388009601],[36.78565020413686,32.0683984995631]]]}
+      }
+    ]
+  };
+
+  // normalize feature names
+  tartusGeoJSON.features.forEach((f, i) => {
+    if (!f.properties) f.properties = {};
+    if (!('name' in f.properties)) {
+      const vals = Object.values(f.properties);
+      f.properties.name = (vals.length && vals[0]) ? String(vals[0]).trim() : `zone-${i}`;
+    }
+    if (f.id === undefined) f.id = i;
+  });
+
+  map.on('load', () => {
+    map.addSource('tartus-zones', { type: 'geojson', data: tartusGeoJSON });
+
+    map.addLayer({
+      id: 'zones-fill',
+      type: 'fill',
+      source: 'tartus-zones',
+      paint: { 'fill-color': '#111111', 'fill-opacity': 0.35 }
+    });
+
+    map.addLayer({
+      id: 'zones-outline',
+      type: 'line',
+      source: 'tartus-zones',
+      paint: { 'line-color': '#000000', 'line-width': 1.5 }
+    });
+
+    map.addLayer({
+      id: 'zones-highlight',
+      type: 'fill',
+      source: 'tartus-zones',
+      paint: { 'fill-color': 'rgba(255, 230, 0, 0.6)', 'fill-opacity': 0.4 },
+      filter: ['==', ['get', 'name'], '___NO_MATCH___']
+    });
+
+    const notebox = document.getElementById('notebox');
+    const cursorTip = document.getElementById('cursorTip');
+
+    map.on('mousemove', 'zones-fill', (e) => {
+      const feat = e.features[0];
+      const name = feat.properties.name || 'Unnamed';
+      map.setFilter('zones-highlight', ['==', ['get', 'name'], name]);
+      const percentage = zonePercentages[name] || '';
+      notebox.textContent = `${name} - ${percentage}`;
+
+      cursorTip.style.display = 'block';
+      cursorTip.textContent = name;
+      cursorTip.style.left = (e.point.x + 12) + 'px';
+      cursorTip.style.top = (e.point.y + 12) + 'px';
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'zones-fill', () => {
+      map.setFilter('zones-highlight', ['==', ['get', 'name'], '___NO_MATCH___']);
+      notebox.textContent = 'Hover over a zone';
+      cursorTip.style.display = 'none';
+      map.getCanvas().style.cursor = '';
+    });
+
+    map.on('click', 'zones-fill', (e) => {
+      const feat = e.features[0];
+      const name = feat.properties.name || 'Unnamed';
+      const percentage = zonePercentages[name] || '';
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(`<strong>${name}</strong><br>Percentage: ${percentage}`)
+        .addTo(map);
+    });
+  });
+</script>
+</body>
+</html>
